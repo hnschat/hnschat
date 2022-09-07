@@ -292,12 +292,18 @@
 							break;
 						}
 						else {
-							if (verifyCode($data["domain"], $verifyCode)) {
+							$verified = verifyCode($data["domain"], $verifyCode);
+							if (@$verified["success"]) {
 								$unlockThisOne = sql("UPDATE `domains` SET `locked` = 0 WHERE `id` = ?", [$data["domain"]]);
 								$lockTheOthers = sql("UPDATE `domains` SET `locked` = 1 WHERE `domain` = ? AND `id` != ?", [$getCode["domain"], $data["domain"]]);
 							}
 							else {
-								error("The TXT record was not found.");
+								$errorMessage = "The TXT record was not found.";
+								
+								if (@$verified["error"]["ttl"]) {
+									$errorMessage = "An invalid code was found in your DNS and is now cached for the duration set as your TTL. Please make sure the code is correct try again in ".secondsToHuman($verified["error"]["ttl"], true).".";
+								}
+								error($errorMessage);
 							}
 						}
 					}
@@ -306,11 +312,17 @@
 					}
 				}
 				else {
-					if (verifyCode($data["domain"], $verifyCode)) {
+					$verified = verifyCode($data["domain"], $verifyCode);
+					if (@$verified["success"]) {
 						$unlockThisOne = sql("UPDATE `domains` SET `locked` = 0, `session` = ? WHERE `id` = ?", [$data["key"], $data["domain"]]);
 					}
 					else {
-						error("The TXT record was not found.");
+						$errorMessage = "The TXT record was not found.";
+						
+						if (@$verified["error"]["ttl"]) {
+							$errorMessage = "An invalid code was found in your DNS and is now cached for the duration set as your TTL. Please make sure the code is correct try again in ".secondsToHuman($verified["error"]["ttl"], true).".";
+						}
+						error($errorMessage);
 					}
 				}
 			}

@@ -93,12 +93,13 @@
                             }
                         }
                     }
-
+                    /*
                     $verifiedDomains = verifyDomains($domains);
                     $locked = $verifiedDomains["bad"];
                     if ($locked) {
                         $from->send("LOCKED ".json_encode($locked));
                     }
+                    */
                 }
                 break;
 

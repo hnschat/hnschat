@@ -347,7 +347,7 @@
 			if (!$domainInfo["locked"]) {
 				if (@$domainInfo["code"]) {
 					$verify = verifyCode($domainInfo["id"], $domainInfo["code"]);
-					if ($verify) {
+					if (@$verify["success"]) {
 						$good[] = $domain;
 					}
 					else {
@@ -368,6 +368,9 @@
 	}
 
 	function verifyCode($id, $code) {
+		$output = [];
+		$success = false;
+
 		$getDomain = domainForID($id);
 
 		if ($getDomain) { 
@@ -375,7 +378,8 @@
 
 			if ($getDomain["signature"]) {
 				if (verifySignature($domain, $getDomain["signature"], "hns-chat=".$getDomain["code"], @$getDomain["eth"])) {
-					return true;
+					$success = true;
+					goto skip;
 				}
 			}
 
@@ -386,17 +390,28 @@
 			}
 
 			$getRecords = shell_exec("dig @".$dnsServer." +noall +answer +noidnin +noidnout ".escapeshellarg($domain)." TXT");
-			preg_match_all("/(?<domain>.+)\..+TXT\s\"(?<value>.+)\"/", $getRecords, $matches);
+			preg_match_all("/(?<domain>.+)\..+?(?<ttl>[0-9]+?)\s.+TXT\s\"(?<value>.+)\"/", $getRecords, $matches);
 
 			if ($matches) {
 				foreach ($matches["domain"] as $key => $data) {
 					if ($data === $domain) {
+						$ttl = $matches["ttl"][$key];
 						$value = $matches["value"][$key];
 						$split = explode(";", $value);
 
 						foreach ($split as $key => $v) {
-							if ($v === "hns-chat=".$code) {
-								return true;
+							if (substr($v, 0, 9) === "hns-chat=") {
+								if ($v === "hns-chat=".$code) {
+									$success = true;
+									goto skip;
+								}
+								else {
+									if ($domain === "e.xp") {
+										$error = [
+											"ttl" => $ttl
+										];
+									}
+								}
 							}
 						}
 					}
@@ -418,7 +433,8 @@
 								$value = $record["txt"][0];
 
 								if ($value === "hns-chat=".$code) {
-									return true;
+									$success = true;
+									goto skip;
 								}
 							}
 						}
@@ -426,7 +442,14 @@
 				}
 			}
 		}
-		return false;
+
+		skip:
+		$output["success"] = $success;
+		if (!$success) {
+			@$output["error"] = $error;
+		}
+
+		return $output;
 	}
 
 	function verifySignature($domain, $signature, $message, $account=false) {
@@ -869,6 +892,28 @@
 		}
 
 		return false;
+	}
+
+	function secondsToHuman($seconds, $withSeconds=false) {
+		$h = floor(($seconds % 86400) / 3600);
+		$m = floor(($seconds % 3600) / 60);
+		$s = (int)($seconds - ($h * 3600) - ($m * 60));
+
+		$time = [];
+		if ($h) {
+			$time["h"] = $h."h";
+		}
+		if ($m) {
+			$time["m"] = $m."m";
+		}
+		if ($withSeconds) {
+			if ($s) {
+				$time["s"] = $s."s";
+			}
+		}
+
+		$string = implode(" ", $time);
+		return $string;
 	}
 
 	class CssMinifer{ private $fileNames = []; function __construct($fileNames){ $this->fileNames = $fileNames; } private function fileValidator($fileName){ $fileParts = explode('.',$fileName); $fileExtension = end($fileParts); if(strtolower($fileExtension) !== "css"){ throw new Exception("Invalid file type. The extension for the file $fileName is $fileExtension."); } if(!file_exists($fileName)){ throw new Exception("The given file $fileName does not exists."); } } private function setHeaders(){ header('Content-Type: text/css'); } public function minify(){ $this->setHeaders(); $minifiedCss = ""; $fileNames = $this->fileNames; foreach ($fileNames as $fileName){ try{ $this->fileValidator($fileName); $fileContent = file_get_contents($fileName); $minifiedCss = $minifiedCss . $this->minify_css($fileContent); } catch(\Exception $e) { echo 'Message: ' .$e->getMessage(); return false; } } return $minifiedCss; } private function minify_css($input) { if(trim($input) === "") return $input; return preg_replace( array( '#("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')|\/\*(?!\!)(?>.*?\*\/)|^\s*|\s*$#s', '#("(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\'|\/\*(?>.*?\*\/))|\s*+;\s*+(})\s*+|\s*+([*$~^|]?+=|[{};,>~]|\s(?![0-9\.])|!important\b)\s*+|([[(:])\s++|\s++([])])|\s++(:)\s*+(?!(?>[^{}"\']++|"(?:[^"\\\]++|\\\.)*+"|\'(?:[^\'\\\\]++|\\\.)*+\')*+{)|^\s++|\s++\z|(\s)\s+#si', '#(?<=[\s:])(0)(cm|em|ex|in|mm|pc|pt|px|vh|vw|%)#si', '#:(0\s+0|0\s+0\s+0\s+0)(?=[;\}]|\!important)#i', '#(background-position):0(?=[;\}])#si', '#(?<=[\s:,\-])0+\.(\d+)#s', '#(\/\*(?>.*?\*\/))|(?<!content\:)([\'"])([a-z_][a-z0-9\-_]*?)\2(?=[\s\{\}\];,])#si', '#(\/\*(?>.*?\*\/))|(\burl\()([\'"])([^\s]+?)\3(\))#si', '#(?<=[\s:,\-]\#)([a-f0-6]+)\1([a-f0-6]+)\2([a-f0-6]+)\3#i', '#(?<=[\{;])(border|outline):none(?=[;\}\!])#', '#(\/\*(?>.*?\*\/))|(^|[\{\}])(?:[^\s\{\}]+)\{\}#s' ), array( '$1', '$1$2$3$4$5$6$7', '$1', ':0', '$1:0 0', '.$1', '$1$3', '$1$2$4$5', '$1$2$3', '$1:0', '$1$2' ), $input); } }
