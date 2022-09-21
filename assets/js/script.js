@@ -632,6 +632,7 @@ function loadMessages(conversation, options={}) {
 							else if (r.purchase) {
 								msg = "Purchase a .";
 								button.attr("data-action", "purchaseSLD");
+								button.attr("data-registrar", r.registrar);
 							}
 
 							if (r.owned) {
@@ -3943,7 +3944,12 @@ $(() => {
 
 			case "purchaseSLD":
 				tld = toASCII(element.data("tld"));
+
 				link = "https://porkbun.com/tld/"+tld;
+				if (element.data("registrar") == "hshub") {
+					link = "https://hshub.io/tld/"+tld;
+				}
+				
 				goto(link, true);
 
 				if (element.hasClass("button")) {

@@ -135,6 +135,7 @@
 					$canPurchase = isNameStaked($data["tld"]);
 					if ($canPurchase) {
 						$output["purchase"] = true;
+						$output["registrar"] = $canPurchase;
 					}
 					else {
 						$output["unavailable"] = true;

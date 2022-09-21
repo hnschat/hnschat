@@ -778,20 +778,25 @@
 			foreach ($response["records"] as $key => $value) {
 				if ($value["type"] == "NS") {
 					if (stripos($value["ns"], ".nameserver.io.") !== false || stripos($value["ns"], ".registry.namebase.io.") !== false) {
-						return true;
+						return "namebase";
 					}
 				}
 			}
 		}
 
+		$hshub = checkHSHub($tld);
+		if ($hshub) {
+			return "hshub";
+		}
+
 		return false;
 	}
 
-	function checkGateway($tld) {
-		$url = "https://gateway.io/tlds/".$tld;
+	function checkHSHub($tld) {
+		$url = "https://hshub.io/tld/".$tld;
 		$html = getContents($url);
 
-		$canPurchase = preg_match("/<h1>Buy \./", $html);
+		$canPurchase = preg_match("/<div class=\"title\">Buy \./", $html);
 		if ($canPurchase) {
 			return true;
 		}
