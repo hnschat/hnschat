@@ -780,6 +780,9 @@
 					if (stripos($value["ns"], ".nameserver.io.") !== false || stripos($value["ns"], ".registry.namebase.io.") !== false) {
 						return "namebase";
 					}
+					if ($value["ns"] == "0x06081C6B2B876EABDC41DFD3345e8Fa59588C02e._eth.") {
+						return "impervious";
+					}
 				}
 			}
 		}

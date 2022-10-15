@@ -3947,7 +3947,10 @@ $(() => {
 
 				link = "https://porkbun.com/tld/"+tld;
 				if (element.data("registrar") == "hshub") {
-					link = "https://hshub.io/tld/"+tld;
+					link = "https://varo.domains/tld/"+tld;
+				}
+				else if (element.data("registrar") == "impervious") {
+					link = "https://impervious.domains";
 				}
 				
 				goto(link, true);
