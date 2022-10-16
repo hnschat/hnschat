@@ -192,8 +192,8 @@
 			}
 
 			$verifyHandshake = domainIsHandshake($data["domain"]);
+			$verifyEthereum = domainIsEthereum($data["domain"]);
 			if (!$verifyHandshake) {
-				$verifyEthereum = domainIsEthereum($data["domain"]);
 				if (!$verifyEthereum) {
 					error("This name isn't a valid Handshake name.");
 				}
@@ -221,6 +221,8 @@
 					error("An error occurred while tying this domain to your session. Try again?");
 				}
 			}
+
+			$output["eth"] = $verifyEthereum;
 			break;
 
 		case "addSLD":

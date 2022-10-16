@@ -3669,7 +3669,7 @@ $(() => {
 						$("#verifyDomain input[name=domain]").val(r.domain);
 						$("#verifyDomain #code").html(r.code);
 
-						if (value.substring(value.length - 4) === ".eth") {
+						if (r.eth) {
 							$("#verifyOptions .button[data-action=verifyDomainWithTXT]").addClass("disabled");
 							$("#verifyOptions .button[data-action=verifyDomainWithMetaMask]").removeClass("disabled");
 						}

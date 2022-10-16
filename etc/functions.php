@@ -455,6 +455,7 @@
 	function verifySignature($domain, $signature, $message, $account=false) {
 		if (domainIsEthereum($domain)) {
 			if ($domain && $signature && $message && $account) {
+				/*
 				$data = [
 					"domain" => $domain,
 					"code" => $message,
@@ -467,6 +468,38 @@
 
 				if ($result === "true") {
 					return true;
+				}
+				*/
+				
+				$nfts = "https://nft.metafi.codefi.network/accounts/".$account."/nfts";
+				$response = file_get_contents($nfts);
+				$decoded = json_decode($response, true);
+
+				foreach ($decoded["data"] as $key => $value) {
+					$name = @$value["metadata"]["name"];
+
+					if ($name == $domain) {
+						$data = [
+							"address" => $account,
+							"messageSignature" => $signature,
+							"messageRaw" => $message,
+							"saveOption" => "2"
+						];
+
+						$curl = curl_init();
+						curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+						curl_setopt($curl, CURLOPT_HTTPHEADER, ["Content-Type:application/json"]);
+						curl_setopt($curl, CURLOPT_URL,"https://etherscan.io/verifiedSignatures.aspx/VerifyMessageSignature");
+						curl_setopt($curl, CURLOPT_POST, 1);
+						curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+						$response = curl_exec($curl);
+						curl_close ($curl);
+
+						$json = json_decode($response, true);
+						if ($json["d"]["success"]) {
+							return true;
+						}
+					}
 				}
 			}
 		}

@@ -32,7 +32,7 @@ try {
 
 	if (json.domain && json.code && json.account && json.signature) {
 		const Web3 = require("web3");
-		const web3 = new Web3(Web3.givenProvider || "ws://localhost:8546");
+		const web3 = new Web3(Web3.givenProvider || "ws://172.28.179.47:8546");
 
 		verify(web3, json).then(response => {
 			die(response);
