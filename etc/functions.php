@@ -406,11 +406,9 @@
 									goto skip;
 								}
 								else {
-									if ($domain === "e.xp") {
-										$error = [
-											"ttl" => $ttl
-										];
-									}
+									$error = [
+										"ttl" => $ttl
+									];
 								}
 							}
 						}
