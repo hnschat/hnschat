@@ -2455,7 +2455,7 @@ function websocket() {
 		}
 	}
 
-	socket = new WebSocket("wss://ws."+host);
+	socket = new WebSocket("wss://"+host+"/wss");
 
 	socket.onopen = (e) => {
 		showChat(1);
