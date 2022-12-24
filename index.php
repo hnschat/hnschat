@@ -46,9 +46,9 @@
 			<div class="subtitle">If you enjoy using this free service, please consider donating.</div>
 			<input type="text" name="usd" placeholder="$ 1.00">
 			<div class="button" data-action="submitDonation">BTC, LTC, or DOGE with BTCPay</div>
+			<div class="response"></div>
 			<div class="address">hs1qf0cxy6ukhgjlmqfhe0tpw800t2tcul4s0szwqa</div>
 			<div class="center">&copy; <?php echo date("Y"); ?>&nbsp;<a href="https://eskimosoftware" target="_blank">Eskimo Software</a></div>
-			<div class="response"></div>
 		</div>
 	</div>
 	<div class="popover" data-name="pay">
