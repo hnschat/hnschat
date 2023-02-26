@@ -294,11 +294,13 @@
                             "conversation" => $data["conversation"], 
                             "user" => $data["from"], 
                             "message" => htmlentities($data["message"]),
+                            "reply" => 0,
                             "replying" => @$data["replying"],
-                            "reactions" => "[]"
+                            "reactions" => "{}"
                         ];
 
                         if (@$data["replying"]) {
+                            $message["reply"] = 1;
                             $getOriginalMessage = @sql("SELECT `id`,`time`,`conversation`,`user`,`message`,`replying` FROM `messages` WHERE `id` = ? AND `conversation` = ?", [$data["replying"], $data["conversation"]])[0];
                             if (!$getOriginalMessage) {
                                 $message["replying"] = NULL;
@@ -312,7 +314,7 @@
 
                         $message["signed"] = @$verifySignature ? 1 : 0;
                         $message["signature"] = @$data["signature"] ? $data["signature"] : NULL;
-                        $insertMessage = sql("INSERT INTO `messages` (id, time, conversation, user, message, replying, reactions, signed, signature) VALUES (?,?,?,?,?,?,?,?,?)", array_values($message));
+                        $insertMessage = sql("INSERT INTO `messages` (id, time, conversation, user, message, reply, replying, reactions, signed, signature) VALUES (?,?,?,?,?,?,?,?,?,?)", array_values($message));
 
                         if ($insertMessage) {
                             $message["message"] = htmlentities($message["message"]);

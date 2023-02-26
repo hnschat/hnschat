@@ -397,7 +397,7 @@
 					}
 
 					$latestMessage = [];
-
+					
 					$getLatestMessage = @sql("SELECT * FROM `messages` WHERE `conversation` = ? ORDER BY `ai` DESC LIMIT 1", [$info["id"]])[0];
 					if ($getLatestMessage) {
 						$latestMessage = [
